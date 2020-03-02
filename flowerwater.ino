@@ -9,6 +9,13 @@
 #define PHONE_NUMBER "0405209879"
 #define MESSAGE  "starting automatic water system"
 
+#define MESSAGE_LENGTH 160
+char message[MESSAGE_LENGTH];
+int messageIndex = 0;
+
+char phone[16];
+char datetime[24];
+
 GPRS gprs(PIN_TX, PIN_RX, BAUDRATE); //RX,TX,BaudRate
 
 void setup() {
@@ -36,5 +43,16 @@ void setup() {
 }
 
 void loop() {
-    //nothing to do
+    messageIndex = gprs.isSMSunread();
+    if (messageIndex > 0) { //At least, there is one UNREAD SMS
+        gprs.readSMS(messageIndex, message, MESSAGE_LENGTH, phone, datetime);
+        //In order not to full SIM Memory, is better to delete it
+        gprs.deleteSMS(messageIndex);
+        Serial.print("From number: ");
+        Serial.println(phone);
+        Serial.print("Datetime: ");
+        Serial.println(datetime);
+        Serial.print("Recieved Message: ");
+        Serial.println(message);
+    }
 }
